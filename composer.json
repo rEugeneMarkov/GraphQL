@@ -1,0 +1,19 @@
+{
+    "name": "jevgenijsmarkovs/graph-ql",
+    "description": "First Graph QL",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Eugene Markov",
+            "email": "rEugeneMarkov@gmail.com"
+        }
+    ],
+    "require": {
+        "webonyx/graphql-php": "^15.5"
+    }
+}
