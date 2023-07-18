@@ -3,7 +3,6 @@
 namespace App\Type;
 
 use App\Data\DataSource;
-use App\Type\AuthorType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
