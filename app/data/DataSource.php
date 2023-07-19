@@ -2,33 +2,47 @@
 
 namespace App\Data;
 
+use PDO;
+use App\Core\DB;
+
 class DataSource
 {
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = DB::getInstance();
+    }
+
+    private function getAll(string $tableName)
+    {
+        $sql = "SELECT * FROM $tableName;";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public static function getAuthors()
     {
-        return [
-            ['id' => 1, 'name' => 'Автор 1'],
-            ['id' => 2, 'name' => 'Автор 2'],
-            ['id' => 3, 'name' => 'Автор 3'],
-        ];
+        $instance = new self();
+
+        $data = $instance->getAll('authors');
+        return $data;
     }
 
     public static function getBooks()
     {
-        return [
-            ['id' => 1, 'name' => 'Книга 1', 'author_id' => 1],
-            ['id' => 2, 'name' => 'Книга 2', 'author_id' => 2],
-            ['id' => 3, 'name' => 'Книга 3', 'author_id' => 3],
-        ];
+        $instance = new self();
+
+        $data = $instance->getAll('books');
+        return $data;
     }
 
     public static function getReviews()
     {
-        return [
-            ['id' => 1, 'book_id' => 1, 'review' => 'Отзыв на книгу 1'],
-            ['id' => 2, 'book_id' => 2, 'review' => 'Отзыв на книгу 2'],
-            ['id' => 3, 'book_id' => 3, 'review' => 'Отзыв на книгу 3'],
-        ];
+        $instance = new self();
+
+        $data = $instance->getAll('reviews');
+        return $data;
     }
 
     public static function findBooks(int $id): array

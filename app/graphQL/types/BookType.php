@@ -1,34 +1,34 @@
 <?php
 
-namespace App\Type;
+namespace App\GraphQL\Types;
 
-use App\Type\BookType;
-use App\Data\DataSource;
+use App\Models\Book;
+use App\GraphQL\Types\ReviewType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
-class AuthorType extends ObjectType
+class BookType extends ObjectType
 {
     private static $instance;
 
     public static function getInstance()
     {
         if (!self::$instance) {
-            self::$instance = new AuthorType();
+            self::$instance = new BookType();
         }
         return self::$instance;
     }
 
-    public function __construct()
+    private function __construct()
     {
         parent::__construct([
-            'name' => 'Author',
+            'name' => 'Book',
             'fields' => [
                 'id' => ['type' => Type::int()],
                 'name' => ['type' => Type::string()],
-                'books' => [
-                    'type' => Type::listOf(BookType::getInstance()),
-                    'resolve' => fn ($author): array => DataSource::findBooks($author['id']),
+                'reviews' => [
+                    'type' => Type::listOf(ReviewType::getInstance()),
+                    'resolve' => fn ($book): array => Book::find($book['id'])->reviews(),
                 ]
             ]
         ]);

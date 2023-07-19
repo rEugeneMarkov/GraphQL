@@ -1,8 +1,13 @@
 <?php
 
-namespace App\Type;
+namespace App\GraphQL\Types;
 
-use App\Data\DataSource;
+use App\Models\Book;
+use App\Models\Author;
+use App\Models\Review;
+use App\GraphQL\Types\BookType;
+use App\GraphQL\Types\AuthorType;
+use App\GraphQL\Types\ReviewType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
@@ -25,15 +30,15 @@ class QueryType extends ObjectType
             'fields' => [
                 'authors' => [
                     'type' => Type::listOf(AuthorType::getInstance()),
-                    'resolve' => fn() => DataSource::getAuthors(),
+                    'resolve' => fn() => Author::all(),
                 ],
                 'books' => [
                     'type' => Type::listOf(BookType::getInstance()),
-                    'resolve' => fn() => DataSource::getBooks(),
+                    'resolve' => fn() => Book::all(),
                 ],
                 'reviews' => [
                     'type' => Type::listOf(ReviewType::getInstance()),
-                    'resolve' => fn() => DataSource::getReviews(),
+                    'resolve' => fn() => Review::all(),
                 ],
             ],
         ]);
