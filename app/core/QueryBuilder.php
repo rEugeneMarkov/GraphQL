@@ -18,7 +18,7 @@ class QueryBuilder
         }
     }
 
-    public function where($column, $operator, $value)
+    public function where($column, $operator = '=', $value)
     {
         $this->where[] = [$column, $operator, $value];
         return $this;

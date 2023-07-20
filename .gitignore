@@ -1,5 +1,6 @@
 index1.php
 index2.php
 vendor/
-app/GraphQL/types/GraphQLTypes.php
+app/graphQL/types/GraphQLTypes.php
 app/data/DataSource.php
+app/graphQL/mutationTypes/MutationType1.php

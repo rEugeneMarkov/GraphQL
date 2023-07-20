@@ -7,6 +7,7 @@ use App\Data\DataGenerator;
 use App\Data\TablesMigration;
 use App\GraphQL\Types\QueryType;
 use GraphQL\Server\StandardServer;
+use App\GraphQL\MutationTypes\MutationType;
 
 $tablesMigrator = new TablesMigration();
 $tablesMigrator->createTables();
@@ -16,6 +17,7 @@ $generator->init();
 
 $schema = new Schema([
     'query' => QueryType::getInstance(),
+    'mutation' => MutationType::getInstance(),
 ]);
 
 $server = new StandardServer([
