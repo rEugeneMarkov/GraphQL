@@ -30,7 +30,10 @@ class BookType extends ObjectType
                     'type' => Type::listOf(ReviewType::getInstance()),
                     'resolve' => fn ($book): array => Book::find($book['id'])->reviews(),
                 ]
-            ]
+            ],
+            'args' => [
+                'id' => ['type' => Type::nonNull(Type::int())],
+            ],
         ]);
     }
 }

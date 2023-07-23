@@ -30,7 +30,10 @@ class AuthorType extends ObjectType
                     'type' => Type::listOf(BookType::getInstance()),
                     'resolve' => fn ($author): array => Author::find($author['id'])->books(),
                 ]
-            ]
+            ],
+            'args' => [
+                'id' => ['type' => Type::nonNull(Type::int())],
+            ],
         ]);
     }
 }

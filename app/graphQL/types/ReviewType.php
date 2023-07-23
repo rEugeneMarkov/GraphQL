@@ -24,7 +24,10 @@ class ReviewType extends ObjectType
             'fields' => [
                 'id' => ['type' => Type::int()],
                 'review' => ['type' => Type::string()]
-            ]
+            ],
+            'args' => [
+                'id' => ['type' => Type::nonNull(Type::int())],
+            ],
         ]);
     }
 }

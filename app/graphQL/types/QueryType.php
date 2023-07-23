@@ -40,6 +40,27 @@ class QueryType extends ObjectType
                     'type' => Type::listOf(ReviewType::getInstance()),
                     'resolve' => fn() => Review::all(),
                 ],
+                'author' => [
+                    'type' => AuthorType::getInstance(),
+                    'args' => [
+                        'id' => ['type' => Type::nonNull(Type::int())],
+                    ],
+                    'resolve' => fn ($rootValue, $args) => Author::find($args['id'])->toArray(),
+                ],
+                'book' => [
+                    'type' => BookType::getInstance(),
+                    'args' => [
+                        'id' => ['type' => Type::nonNull(Type::int())],
+                    ],
+                    'resolve' => fn ($rootValue, $args) => Book::find($args['id'])->toArray(),
+                ],
+                'review' => [
+                    'type' => ReviewType::getInstance(),
+                    'args' => [
+                        'id' => ['type' => Type::nonNull(Type::int())],
+                    ],
+                    'resolve' => fn ($rootValue, $args) => Review::find($args['id'])->toArray(),
+                ],
             ],
         ]);
     }
