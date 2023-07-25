@@ -54,7 +54,9 @@ abstract class Model
             }
         }
 
-        $sql = "UPDATE " . static::getTableName() . " SET " . implode(', ', $set) . " WHERE " . static::$primaryKey . " = :id";
+        $sql = "UPDATE " . static::getTableName() .
+            " SET " . implode(', ', $set) .
+            " WHERE " . static::$primaryKey . " = :id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_merge($attributes, ['id' => $attributes[static::$primaryKey]]));
 

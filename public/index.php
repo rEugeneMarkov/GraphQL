@@ -2,12 +2,12 @@
 
 require_once '../vendor/autoload.php';
 
-use GraphQL\Type\Schema;
+use App\Core\Environment;
 use App\Data\DataGenerator;
 use App\Data\TablesMigration;
-use App\GraphQL\Types\QueryType;
-use GraphQL\Server\StandardServer;
-use App\GraphQL\MutationTypes\MutationType;
+use App\GraphQL\GraphQLServer;
+
+Environment::init();
 
 $tablesMigrator = new TablesMigration();
 $tablesMigrator->createTables();
@@ -15,13 +15,4 @@ $tablesMigrator->createTables();
 $generator = new DataGenerator();
 $generator->init();
 
-$schema = new Schema([
-    'query' => QueryType::getInstance(),
-    'mutation' => MutationType::getInstance(),
-]);
-
-$server = new StandardServer([
-    'schema' => $schema,
-]);
-
-$server->handleRequest();
+GraphQLServer::getInstance()->handleRequest();

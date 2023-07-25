@@ -22,3 +22,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: graph-ql-db
+  test_mysql:
+    image: mysql:8
+    container_name: graph-ql-test-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: graph-ql-test-db

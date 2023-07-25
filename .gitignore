@@ -4,3 +4,5 @@ vendor/
 app/graphQL/types/GraphQLTypes.php
 app/data/DataSource.php
 app/graphQL/mutationTypes/MutationType1.php
+.phpunit.cache
+.phpunit.result.cache
