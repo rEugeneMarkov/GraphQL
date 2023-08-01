@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core;
+
+use PDO;
 
 class DB
 {
-    private static $db = null;
+    private static ?PDO $db = null;
 
-    public static function getInstance()
+    public static function getInstance(): PDO
     {
         $environment = $_ENV['APP_ENV'] ?? 'development';
 
@@ -23,7 +27,7 @@ class DB
         }
 
         if (self::$db === null) {
-            self::$db = new \PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+            self::$db = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
         }
 
         return self::$db;

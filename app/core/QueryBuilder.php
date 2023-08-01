@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Core;
 
 use PDO;
 
 class QueryBuilder
 {
-    protected $table;
-    protected $where = [];
+    protected string $table;
+    protected array $where = [];
 
     public function __construct($table, $column = null, $operator = null, $value = null)
     {
@@ -18,13 +20,13 @@ class QueryBuilder
         }
     }
 
-    public function where($column, $operator, $value)
+    public function where($column, $operator, $value): QueryBuilder
     {
         $this->where[] = [$column, $operator, $value];
         return $this;
     }
 
-    public function get()
+    public function get(): array
     {
         $pdo = DB::getInstance();
         $whereClause = $this->buildWhereClause();
@@ -40,7 +42,7 @@ class QueryBuilder
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    protected function buildWhereClause()
+    protected function buildWhereClause(): string
     {
         if (empty($this->where)) {
             return '';
