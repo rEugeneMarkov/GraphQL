@@ -19,7 +19,7 @@ class BookQueryTest extends TestCase
             }
         }';
 
-        $response = $this->sendGraphQLRequest($query);
+        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
         $data = json_decode($response, true);
 
         $this->assertArrayHasKey('data', $data);
@@ -53,7 +53,7 @@ class BookQueryTest extends TestCase
             }
         }';
 
-        $response = $this->sendGraphQLRequest($query);
+        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
         $data = json_decode($response, true);
 
         $this->assertArrayHasKey('data', $data);
