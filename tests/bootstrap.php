@@ -21,8 +21,8 @@ function rollbackMigration()
     $app->run(new StringInput('rollback -e testing -t 0'), new NullOutput());
 }
 
-runMigration();
+//runMigration();
 
-register_shutdown_function(function () {
-    rollbackMigration();
-});
+// register_shutdown_function(function () {
+//     rollbackMigration();
+// });
