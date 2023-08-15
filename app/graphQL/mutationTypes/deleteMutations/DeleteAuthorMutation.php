@@ -3,6 +3,8 @@
 namespace App\GraphQL\MutationTypes\DeleteMutations;
 
 use App\Models\Author;
+use GraphQL\Error\UserError;
+use App\Services\AuthService;
 use App\GraphQL\Types\AuthorType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
@@ -29,10 +31,30 @@ class DeleteAuthorMutation extends ObjectType
                     'args' => [
                         'id' => ['type' => Type::nonNull(Type::int())],
                     ],
-                    'resolve' => fn ($rootValue, $args) =>
-                        Author::delete($args['id']),
+                    'resolve' => fn ($rootValue, $args) => $this->resolveDeleteAuthor($args)
                 ],
             ],
         ]);
+    }
+
+    private function resolveDeleteAuthor(array $args): void
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            $author = Author::find($args['id']);
+
+            if (is_null($author)) {
+                throw new \Exception("Author don't exists");
+            }
+
+            $author->delete($args['id']);
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

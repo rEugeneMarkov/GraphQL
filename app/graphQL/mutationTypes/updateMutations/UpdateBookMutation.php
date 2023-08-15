@@ -3,6 +3,8 @@
 namespace App\GraphQL\MutationTypes\UpdateMutations;
 
 use App\Models\Book;
+use GraphQL\Error\UserError;
+use App\Services\AuthService;
 use App\GraphQL\Types\BookType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
@@ -31,10 +33,24 @@ class UpdateBookMutation extends ObjectType
                         'name' => ['type' => Type::nonNull(Type::string())],
                         'author_id' => ['type' => Type::nonNull(Type::int())],
                     ],
-                    'resolve' => fn ($rootValue, $args) =>
-                        Book::update(['id' => $args['id'], 'name' => $args['name'], 'author_id' => $args['author_id']]),
+                    'resolve' => fn ($rootValue, $args) => $this->resolveUpdateBook($args),
                 ],
             ],
         ]);
+    }
+
+    private function resolveUpdateBook(array $args): Book
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            return Book::update($args);
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

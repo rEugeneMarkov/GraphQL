@@ -3,9 +3,11 @@
 namespace App\GraphQL\MutationTypes\UpdateMutations;
 
 use App\Models\Author;
+use GraphQL\Error\UserError;
 use App\GraphQL\Types\AuthorType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
+use App\Services\AuthService;
 
 class UpdateAuthorMutation extends ObjectType
 {
@@ -30,10 +32,24 @@ class UpdateAuthorMutation extends ObjectType
                         'id' => ['type' => Type::nonNull(Type::int())],
                         'name' => ['type' => Type::nonNull(Type::string())],
                     ],
-                    'resolve' => fn ($rootValue, $args) =>
-                        Author::update(['id' => $args['id'], 'name' => $args['name']]),
+                    'resolve' => fn ($rootValue, $args) => $this->resolveUpdateAuthor($args),
                 ],
             ],
         ]);
+    }
+
+    private function resolveUpdateAuthor(array $args): Author
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            return Author::update(['id' => $args['id'], 'name' => $args['name']]);
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

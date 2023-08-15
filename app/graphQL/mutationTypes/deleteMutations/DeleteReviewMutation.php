@@ -2,8 +2,10 @@
 
 namespace App\GraphQL\MutationTypes\DeleteMutations;
 
-use App\GraphQL\Types\ReviewType;
 use App\Models\Review;
+use GraphQL\Error\UserError;
+use App\Services\AuthService;
+use App\GraphQL\Types\ReviewType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
@@ -29,10 +31,30 @@ class DeleteReviewMutation extends ObjectType
                     'args' => [
                         'id' => ['type' => Type::nonNull(Type::int())],
                     ],
-                    'resolve' => fn($rootValue, $args) =>
-                        Review::delete($args['id']),
+                    'resolve' => fn($rootValue, $args) => $this->resolveDeleteReview($args),
                 ],
             ],
         ]);
+    }
+
+    private function resolveDeleteReview(array $args): void
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            $author = Review::find($args['id']);
+
+            if (is_null($author)) {
+                throw new \Exception("Book don't exists");
+            }
+
+            $author->delete($args['id']);
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

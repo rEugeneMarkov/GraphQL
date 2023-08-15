@@ -3,15 +3,17 @@
 namespace App\GraphQL\MutationTypes\AddMutations;
 
 use App\Models\Book;
+use GraphQL\Error\UserError;
+use App\Services\AuthService;
 use App\GraphQL\Types\BookType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
 class AddBookMutation extends ObjectType
 {
-    private static $instance;
+    private static ?self $instance = null;
 
-    public static function getInstance()
+    public static function getInstance(): AddBookMutation
     {
         if (!self::$instance) {
             self::$instance = new AddBookMutation();
@@ -30,10 +32,24 @@ class AddBookMutation extends ObjectType
                         'name' => ['type' => Type::nonNull(Type::string())],
                         'author_id' => ['type' => Type::nonNull(Type::int())],
                     ],
-                    'resolve' => fn ($rootValue, $args) =>
-                        Book::create(['name' => $args['name'], 'author_id' => $args['author_id']]),
+                    'resolve' => fn ($rootValue, $args): array => $this->resolveAddBook($args),
                 ],
             ],
         ]);
+    }
+
+    private function resolveAddBook(array $args): array
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            return Book::create($args)->toArray();
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

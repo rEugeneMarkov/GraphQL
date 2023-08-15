@@ -2,8 +2,10 @@
 
 namespace App\GraphQL\MutationTypes\UpdateMutations;
 
-use App\GraphQL\Types\ReviewType;
 use App\Models\Review;
+use GraphQL\Error\UserError;
+use App\Services\AuthService;
+use App\GraphQL\Types\ReviewType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
@@ -31,10 +33,24 @@ class UpdateReviewMutation extends ObjectType
                         'review' => ['type' => Type::nonNull(Type::string())],
                         'book_id' => ['type' => Type::nonNull(Type::int())],
                     ],
-                    'resolve' => fn($rootValue, $args) =>
-                        Review::update(['id' => $args['id'], 'review' => $args['review'], 'book_id' => $args['book_id']]),
+                    'resolve' => fn($rootValue, $args) => $this->resolveUpdateReview($args),
                 ],
             ],
         ]);
+    }
+
+    private function resolveUpdateReview(array $args): Review
+    {
+        try {
+            AuthService::getInstance()->checkAuthentication();
+
+            return Review::update($args);
+        } catch (\Exception $e) {
+            throw new UserError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
+        }
     }
 }

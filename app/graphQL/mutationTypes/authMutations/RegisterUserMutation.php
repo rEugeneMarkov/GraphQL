@@ -1,22 +1,20 @@
 <?php
 
-namespace App\GraphQL\MutationTypes\AddMutations;
+namespace App\GraphQL\MutationTypes\AuthMutations;
 
-use App\Models\Author;
 use GraphQL\Error\UserError;
 use App\Services\AuthService;
-use App\GraphQL\Types\AuthorType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 
-class AddAuthorMutation extends ObjectType
+class RegisterUserMutation extends ObjectType
 {
     private static ?self $instance = null;
 
-    public static function getInstance(): AddAuthorMutation
+    public static function getInstance(): self
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new AddAuthorMutation();
+        if (!self::$instance) {
+            self::$instance = new RegisterUserMutation();
         }
         return self::$instance;
     }
@@ -26,24 +24,23 @@ class AddAuthorMutation extends ObjectType
         parent::__construct([
             'name' => 'Mutation',
             'fields' => [
-                'addAuthor' => [
-                    'type' => AuthorType::getInstance(),
+                'registerUser' => [
+                    'type' => Type::string(),
                     'args' => [
                         'name' => ['type' => Type::nonNull(Type::string())],
+                        'email' => ['type' => Type::nonNull(Type::string())],
+                        'password' => ['type' => Type::nonNull(Type::string())],
                     ],
-                    'resolve' => fn ($rootValue, $args): array => $this->resolveAddAuthor($args),
+                    'resolve' => fn($rootValue, $args) => $this->resolveRegisterUser($args),
                 ],
             ],
         ]);
     }
 
-    private function resolveAddAuthor(array $args): array
+    private function resolveRegisterUser(array $args): string
     {
         try {
-            AuthService::getInstance()->checkAuthentication();
-
-            $author = Author::create($args);
-            return $author->toArray();
+            return AuthService::getInstance()->registerUser($args);
         } catch (\Exception $e) {
             throw new UserError(
                 $e->getMessage(),
