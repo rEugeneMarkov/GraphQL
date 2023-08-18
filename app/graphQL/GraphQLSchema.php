@@ -8,21 +8,13 @@ use App\GraphQL\MutationTypes\MutationType;
 
 class GraphQLSchema extends Schema
 {
-    private static $instance;
-
-    public static function getInstance()
-    {
-        if (!self::$instance) {
-            self::$instance = new GraphQLSchema();
-        }
-        return self::$instance;
-    }
-
-    public function __construct()
-    {
+    public function __construct(
+        MutationType $mutationType,
+        QueryType $queryType
+    ) {
         parent::__construct([
-            'query' => QueryType::getInstance(),
-            'mutation' => MutationType::getInstance(),
+            'query' => $queryType,
+            'mutation' => $mutationType,
         ]);
     }
 }

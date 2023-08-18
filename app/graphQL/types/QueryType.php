@@ -13,17 +13,7 @@ use GraphQL\Type\Definition\ObjectType;
 
 class QueryType extends ObjectType
 {
-    private static $instance;
-
-    public static function getInstance()
-    {
-        if (!self::$instance) {
-            self::$instance = new QueryType();
-        }
-        return self::$instance;
-    }
-
-    private function __construct()
+    public function __construct()
     {
         parent::__construct([
             'name' => 'Query',

@@ -27,6 +27,6 @@ switch ($routeInfo[0]) {
     case Dispatcher::FOUND:
         $handler = $routeInfo[1];
         $vars = $routeInfo[2];
-        call_user_func_array($handler, $vars);
+        $container->call($handler, $vars);
         break;
 }

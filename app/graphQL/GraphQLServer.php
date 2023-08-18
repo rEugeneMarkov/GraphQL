@@ -2,24 +2,15 @@
 
 namespace App\GraphQL;
 
+use App\GraphQL\GraphQLSchema;
 use GraphQL\Server\StandardServer;
 
 class GraphQLServer extends StandardServer
 {
-    private static $instance;
-
-    public static function getInstance()
-    {
-        if (!self::$instance) {
-            self::$instance = new GraphQLServer();
-        }
-        return self::$instance;
-    }
-
-    public function __construct()
+    public function __construct(GraphQLSchema $graphQLSchema)
     {
         parent::__construct([
-            'schema' => GraphQLSchema::getInstance(),
+            'schema' => $graphQLSchema,
         ]);
     }
 }
