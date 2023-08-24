@@ -41,7 +41,7 @@ class ReviewMutations extends ObjectType
                         $this->resolversFactory('resolveUpdateReview', $args),
                 ],
                 'deleteReview' => [
-                    'type' => ReviewType::getInstance(),
+                    'type' => Type::string(),
                     'args' => [
                         'id' => ['type' => Type::nonNull(Type::int())],
                     ],

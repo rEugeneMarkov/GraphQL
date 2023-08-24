@@ -2,10 +2,13 @@
 
 namespace Tests\Functional\GraphQL;
 
-use Tests\TestCase;
+use Tests\SendGraphQLRequest;
+use PHPUnit\Framework\TestCase;
 
 class BookQueryTest extends TestCase
 {
+    use SendGraphQLRequest;
+
     public function testBooksQuery()
     {
         $query = '{

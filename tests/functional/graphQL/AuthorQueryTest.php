@@ -2,10 +2,13 @@
 
 namespace Tests\Functional\GraphQL;
 
-use Tests\TestCase;
+use Tests\SendGraphQLRequest;
+use PHPUnit\Framework\TestCase;
 
 class AuthorQueryTest extends TestCase
 {
+    use SendGraphQLRequest;
+
     public function testAuthorsQuery()
     {
         $query = '{
@@ -54,7 +57,7 @@ class AuthorQueryTest extends TestCase
     public function testAuthorQuery()
     {
         $query = '{
-            author (id: 2) {
+            author (id: 1) {
                 id
                 name
                 books {

@@ -39,7 +39,7 @@ class BookMutations extends ObjectType
                     'resolve' => fn ($rootValue, $args): Book => $this->resolversFactory('resolveUpdateBook', $args),
                 ],
                 'deleteBook' => [
-                    'type' => BookType::getInstance(),
+                    'type' => Type::string(),
                     'args' => [
                         'id' => ['type' => Type::nonNull(Type::int())],
                     ],

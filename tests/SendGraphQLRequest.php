@@ -2,9 +2,11 @@
 
 namespace Tests;
 
+use App\Services\AuthService;
+
 trait SendGraphQLRequest
 {
-    public function sendGraphQLRequest($query, $baseUrl = 'http://localhost')
+    private function sendGraphQLRequest($query, $baseUrl = 'http://localhost', $authToken = '')
     {
         $ch = curl_init($baseUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -12,10 +14,29 @@ trait SendGraphQLRequest
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'X-APP-ENV: ' . $_ENV['APP_ENV'],
+            'Authorization: Bearer ' . $authToken,
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['query' => $query]));
         $response = curl_exec($ch);
         curl_close($ch);
         return $response;
+    }
+
+    private function getAuthToken($email, $password)
+    {
+        try {
+            $authService = AuthService::getInstance();
+
+            $loginData = [
+                'email' => $email,
+                'password' => $password,
+            ];
+
+            $token = $authService->loginUser($loginData);
+
+            return $token;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
