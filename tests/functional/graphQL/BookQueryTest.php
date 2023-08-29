@@ -3,7 +3,7 @@
 namespace Tests\Functional\GraphQL;
 
 use Tests\SendGraphQLRequest;
-use PHPUnit\Framework\TestCase;
+use Tests\Functional\TestCase;
 
 class BookQueryTest extends TestCase
 {

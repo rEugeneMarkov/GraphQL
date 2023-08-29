@@ -1,9 +1,5 @@
 <?php
 
-use App\Core\Environment;
-
-Environment::init();
-
 return [
     'paths' => [
         'migrations' => 'database/migrations',
@@ -14,11 +10,11 @@ return [
         'default_database' => 'development',
         'development' => [
             'adapter' => 'mysql',
-            'host' => $_ENV['DB_HOST'],
-            'name' => $_ENV['DB_DATABASE'],
-            'user' => $_ENV['DB_USERNAME'],
-            'pass' => $_ENV['DB_PASSWORD'],
-            'port' => $_ENV['DB_PORT'],
+            'host' => 'mysql:3306',
+            'name' => 'graph-ql-db',
+            'user' => 'root',
+            'pass' => 'root',
+            'port' => 3306,
             'charset' => 'utf8'
         ],
         'testing' => [
@@ -30,15 +26,6 @@ return [
             'port' => 3306,
             'charset' => 'utf8'
         ],
-        // 'testing' => [
-        //     'adapter' => 'mysql',
-        //     'host' => $_ENV['DB_HOST_TEST'],
-        //     'name' => $_ENV['DB_DATABASE_TEST'],
-        //     'user' => $_ENV['DB_USERNAME_TEST'],
-        //     'pass' => $_ENV['DB_PASSWORD_TEST'],
-        //     'port' => $_ENV['DB_PORT_TEST'],
-        //     'charset' => 'utf8'
-        // ]
     ],
     'version_order' => 'creation'
 ];

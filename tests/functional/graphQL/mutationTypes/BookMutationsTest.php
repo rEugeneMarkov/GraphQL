@@ -3,16 +3,17 @@
 namespace Tests\Functional\GraphQL\MutationTypes;
 
 use Tests\SendGraphQLRequest;
-use PHPUnit\Framework\TestCase;
+use Tests\Functional\TestCase;
 
 class BookMutationsTest extends TestCase
 {
     use SendGraphQLRequest;
 
-    private $authToken;
+    private string $authToken;
 
     public function setUp(): void
     {
+        parent::setUp();
         $this->authToken = $this->getAuthToken('test@test.com', 'password');
     }
 

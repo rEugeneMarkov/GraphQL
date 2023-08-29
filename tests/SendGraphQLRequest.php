@@ -13,7 +13,7 @@ trait SendGraphQLRequest
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'X-APP-ENV: ' . $_ENV['APP_ENV'],
+            'X-APP-ENV: testing',
             'Authorization: Bearer ' . $authToken,
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['query' => $query]));
