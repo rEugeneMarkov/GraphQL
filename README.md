@@ -5,4 +5,4 @@ docker compose exec php vendor/bin/phinx seed:run
 
 ### Testing...
 
-./tests/paratest.sh
+docker-compose exec php vendor/bin/paratest --functional
