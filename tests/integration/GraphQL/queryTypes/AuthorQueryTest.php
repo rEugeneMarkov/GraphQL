@@ -1,13 +1,45 @@
 <?php
 
-namespace Tests\Functional\GraphQL;
+namespace Tests\Integration\GraphQL\QueryTypes;
 
-use Tests\SendGraphQLRequest;
-use Tests\Functional\TestCase;
+use App\Models\Book;
+use GraphQL\GraphQL;
+use App\Models\Author;
+use App\Models\Review;
+use App\GraphQL\GraphQLSchema;
+use Tests\Integration\TestCase;
 
 class AuthorQueryTest extends TestCase
 {
-    use SendGraphQLRequest;
+    private GraphQLSchema $schema;
+    private Author $author;
+    private Book $book;
+    private Review $review;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->schema = $this->container->get(GraphQLSchema::class);
+
+        $this->author = Author::create([
+            'name' => 'Author for test Book',
+        ]);
+
+        $this->book = Book::create([
+            'name' => 'Book for test Book',
+            'author_id' => $this->author->id,
+        ]);
+
+        $this->review = Review::create([
+            'review' => 'Book for test Book',
+            'book_id' => $this->book->id,
+        ]);
+    }
+
+    public function tearDown(): void
+    {
+        Author::delete($this->author->id);
+    }
 
     public function testAuthorsQuery()
     {
@@ -26,8 +58,9 @@ class AuthorQueryTest extends TestCase
             }
         }';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
-        $data = json_decode($response, true);
+        $result = GraphQL::executeQuery($this->schema, $query);
+
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('authors', $data['data']);
@@ -57,7 +90,7 @@ class AuthorQueryTest extends TestCase
     public function testAuthorQuery()
     {
         $query = '{
-            author (id: 1) {
+            author (id: ' . $this->author->id . ') {
                 id
                 name
                 books {
@@ -71,8 +104,9 @@ class AuthorQueryTest extends TestCase
             }
         }';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
-        $data = json_decode($response, true);
+        $result = GraphQL::executeQuery($this->schema, $query);
+
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('author', $data['data']);

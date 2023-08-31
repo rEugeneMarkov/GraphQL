@@ -1,62 +1,88 @@
 <?php
 
-namespace Tests\Functional\GraphQL\MutationTypes;
+namespace Tests\Integration\GraphQL\MutationTypes;
 
-use Tests\SendGraphQLRequest;
-use Tests\Functional\TestCase;
+use GraphQL\GraphQL;
+use App\GraphQL\GraphQLSchema;
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\Review;
+use Tests\Integration\TestCase;
 
 class ReviewMutationsTest extends TestCase
 {
-    use SendGraphQLRequest;
-
     private string $authToken;
+    private GraphQLSchema $schema;
+    private Author $author;
+    private Book $book;
+    private Review $review;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->authToken = $this->getAuthToken('test@test.com', 'password');
+        $this->schema = $this->container->get(GraphQLSchema::class);
+
+        $this->author = Author::create([
+            'name' => 'Author for test Book',
+        ]);
+
+        $this->book = Book::create([
+            'name' => 'Book for test Book',
+            'author_id' => $this->author->id,
+        ]);
+
+        $this->review = Review::create([
+            'review' => 'Book for test Book',
+            'book_id' => $this->book->id,
+        ]);
     }
 
     public function tearDown(): void
     {
+        Author::delete($this->author->id);
     }
 
     public function testAddReviewMutationWithAuthentication()
     {
         $query = '
             mutation {
-                addReview(review: "Test review", book_id: 3) {
+                addReview(review: "Test review", book_id: ' . $this->book->id . ') {
                     id
                     review
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('addReview', $data['data']);
         $this->assertArrayHasKey('id', $data['data']['addReview']);
         $this->assertArrayHasKey('review', $data['data']['addReview']);
         $this->assertEquals('Test review', $data['data']['addReview']['review']);
+
+        Review::delete($data['data']['addReview']['id']);
     }
 
     public function testAddReviewMutationWithoutAuthentication()
     {
         $query = '
             mutation {
-                addReview(review: "Test review", book_id: 3) {
+                addReview(review: "Test review", book_id: ' . $this->book->id . ') {
                     id
                     review
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -70,22 +96,23 @@ class ReviewMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateReview(id: 3, review: "Test review updated", book_id: 3) {
+                updateReview(id: ' . $this->review->id . ', review: "Review update", book_id: ' . $this->book->id . ') {
                     id
                     review
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('updateReview', $data['data']);
         $this->assertArrayHasKey('id', $data['data']['updateReview']);
         $this->assertArrayHasKey('review', $data['data']['updateReview']);
-        $this->assertEquals('Test review updated', $data['data']['updateReview']['review']);
+        $this->assertEquals('Review update', $data['data']['updateReview']['review']);
     }
 
     public function testUpdateReviewMutationWithoutAuthentication()
@@ -93,16 +120,17 @@ class ReviewMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateReview(id: 2, review: "Test review updated", book_id: 3) {
+                updateReview(id: ' . $this->review->id . ', review: "Review update", book_id: ' . $this->book->id . ') {
                     id
                     review
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -115,30 +143,32 @@ class ReviewMutationsTest extends TestCase
     {
         $query = '
             mutation {
-                deleteReview(id: 3)
+                deleteReview(id: ' . $this->review->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteReview', $data['data']);
         $this->assertEquals('Success', $data['data']['deleteReview']);
     }
 
-    public function testDeleteBookMutationWithoutAuthentication()
+    public function testDeleteReviewMutationWithoutAuthentication()
     {
         $query = '
             mutation {
-                deleteReview(id: 3)
+                deleteReview(id: ' . $this->review->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteReview', $data['data']);

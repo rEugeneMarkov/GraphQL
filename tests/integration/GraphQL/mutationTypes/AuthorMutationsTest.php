@@ -1,24 +1,31 @@
 <?php
 
-namespace Tests\Functional\GraphQL\MutationTypes;
+namespace Tests\Integration\GraphQL\MutationTypes;
 
-use Tests\SendGraphQLRequest;
-use Tests\Functional\TestCase;
+use GraphQL\GraphQL;
+use App\Models\Author;
+use App\GraphQL\GraphQLSchema;
+use Tests\Integration\TestCase;
 
 class AuthorMutationsTest extends TestCase
 {
-    use SendGraphQLRequest;
-
     private string $authToken;
+    private GraphQLSchema $schema;
+    private Author $author;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->authToken = $this->getAuthToken('test@test.com', 'password');
+        $this->schema = $this->container->get(GraphQLSchema::class);
+        $this->author = Author::create([
+            'name' => 'Author test Author',
+        ]);
     }
 
     public function tearDown(): void
     {
+        Author::delete($this->author->id);
     }
 
     public function testAddAuthorMutationWithAuthentication()
@@ -32,15 +39,18 @@ class AuthorMutationsTest extends TestCase
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('addAuthor', $data['data']);
         $this->assertArrayHasKey('id', $data['data']['addAuthor']);
         $this->assertArrayHasKey('name', $data['data']['addAuthor']);
         $this->assertEquals('John Doe', $data['data']['addAuthor']['name']);
+
+        Author::delete($data['data']['addAuthor']['id']);
     }
 
     public function testAddAuthorMutationWithoutAuthentication()
@@ -54,9 +64,10 @@ class AuthorMutationsTest extends TestCase
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -70,16 +81,17 @@ class AuthorMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateAuthor(id: 1, name: "John Doe updated") {
+                updateAuthor(id: ' . $this->author->id . ', name: "John Doe updated") {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('updateAuthor', $data['data']);
@@ -93,16 +105,17 @@ class AuthorMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateAuthor(id: 1, name: "John Doe updated") {
+                updateAuthor(id: ' . $this->author->id . ', name: "John Doe updated") {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -115,13 +128,14 @@ class AuthorMutationsTest extends TestCase
     {
         $query = '
             mutation {
-                deleteAuthor(id: 1)
+                deleteAuthor(id: ' . $this->author->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteAuthor', $data['data']);
@@ -132,13 +146,14 @@ class AuthorMutationsTest extends TestCase
     {
         $query = '
             mutation {
-                deleteAuthor(id: 1)
+                deleteAuthor(id: ' . $this->author->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteAuthor', $data['data']);

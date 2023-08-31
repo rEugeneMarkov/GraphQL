@@ -1,62 +1,81 @@
 <?php
 
-namespace Tests\Functional\GraphQL\MutationTypes;
+namespace Tests\Integration\GraphQL\MutationTypes;
 
-use Tests\SendGraphQLRequest;
-use Tests\Functional\TestCase;
+use GraphQL\GraphQL;
+use App\GraphQL\GraphQLSchema;
+use App\Models\Author;
+use App\Models\Book;
+use Tests\Integration\TestCase;
 
 class BookMutationsTest extends TestCase
 {
-    use SendGraphQLRequest;
-
     private string $authToken;
+    private GraphQLSchema $schema;
+    private Author $author;
+    private Book $book;
 
     public function setUp(): void
     {
         parent::setUp();
         $this->authToken = $this->getAuthToken('test@test.com', 'password');
+        $this->schema = $this->container->get(GraphQLSchema::class);
+
+        $this->author = Author::create([
+            'name' => 'Author for test Book',
+        ]);
+
+        $this->book = Book::create([
+            'name' => 'Book for test Book',
+            'author_id' => $this->author->id,
+        ]);
     }
 
     public function tearDown(): void
     {
+        Author::delete($this->author->id);
     }
 
     public function testAddBookMutationWithAuthentication()
     {
         $query = '
             mutation {
-                addBook(name: "Test book", author_id: 2) {
+                addBook(name: "Test book", author_id: ' . $this->author->id . ') {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('addBook', $data['data']);
         $this->assertArrayHasKey('id', $data['data']['addBook']);
         $this->assertArrayHasKey('name', $data['data']['addBook']);
         $this->assertEquals('Test book', $data['data']['addBook']['name']);
+
+        Book::delete($data['data']['addBook']['id']);
     }
 
     public function testAddBookMutationWithoutAuthentication()
     {
         $query = '
             mutation {
-                addBook(name: "Test book", author_id: 2) {
+                addBook(name: "Test book", author_id: ' . $this->author->id . ') {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -70,22 +89,23 @@ class BookMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateBook(id: 2, name: "Test book updated", author_id: 2) {
+                updateBook(id: ' . $this->book->id . ', name: "Book updated", author_id: ' . $this->author->id . ') {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('updateBook', $data['data']);
         $this->assertArrayHasKey('id', $data['data']['updateBook']);
         $this->assertArrayHasKey('name', $data['data']['updateBook']);
-        $this->assertEquals('Test book updated', $data['data']['updateBook']['name']);
+        $this->assertEquals('Book updated', $data['data']['updateBook']['name']);
     }
 
     public function testUpdateBookMutationWithoutAuthentication()
@@ -93,16 +113,17 @@ class BookMutationsTest extends TestCase
 
         $query = '
             mutation {
-                updateBook(id: 2, name: "Test book updated", author_id: 2) {
+                updateBook(id: ' . $this->book->id . ', name: "Book updated", author_id: ' . $this->author->id . ') {
                     id
                     name
                 }
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('errors', $data);
@@ -115,13 +136,14 @@ class BookMutationsTest extends TestCase
     {
         $query = '
             mutation {
-                deleteBook(id: 2)
+                deleteBook(id: ' . $this->book->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx', $this->authToken);
+        $_SERVER['HTTP_AUTHORIZATION'] = $this->authToken;
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteBook', $data['data']);
@@ -132,13 +154,14 @@ class BookMutationsTest extends TestCase
     {
         $query = '
             mutation {
-                deleteBook(id: 2)
+                deleteBook(id: ' . $this->book->id . ')
             }
         ';
 
-        $response = $this->sendGraphQLRequest($query, 'http://graph-ql-nginx');
+        $_SERVER['HTTP_AUTHORIZATION'] = '';
+        $result = GraphQL::executeQuery($this->schema, $query);
 
-        $data = json_decode($response, true);
+        $data = $result->toArray();
 
         $this->assertArrayHasKey('data', $data);
         $this->assertArrayHasKey('deleteBook', $data['data']);
